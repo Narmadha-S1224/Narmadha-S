@@ -1,0 +1,394 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SIZE 10
+
+int inp_arr[10],flight_log[6];         //creating an array to save the delivery request and flight log
+int Rear = - 1;
+int Front = - 1;
+int top = -1;
+int val=0;
+int value;
+int lv;
+
+void logval(int value)      // function to input values in circular array for saving the last 6 dispatches
+{
+    if(val!=6)
+    {
+        flight_log[val]=value;
+        val=val+1;
+    }
+    else
+    {
+        val=0;
+        logval(value);
+    }
+}
+void array(int num)          // function for displaying the numerical input as the desired request
+{
+    if(num==1)
+    {
+        printf("food\n");
+    }
+    else if(num==2)
+    {
+        printf("medicine\n");
+    }
+    else if(num==3)
+    {
+        printf("tools\n");
+    }
+    else if(num==4)
+    {
+        printf("water\n");
+    }
+    else if(num==5)
+    {
+        printf("parts\n");
+    }
+    else if(num==6)
+    {
+        printf("fuel\n");
+    }
+}
+
+void enqueue()  // funtion to add elements in the delivery request queue
+{
+    int insert_item;
+    if (Rear == SIZE - 1)
+       printf("requests overflow ; wait for the request to be done \n");
+    else
+    {
+        if (Front == - 1)
+      
+        Front = 0;
+        scanf("%d", &insert_item);
+        printf("request accepted \n");
+        Rear = Rear + 1;
+        top=top+1;
+        inp_arr[Rear] = insert_item;
+    }
+} 
+
+void dequeue() //  funtion to normally dispatch the delivery requests
+{
+    if (Front == - 1 || Front > Rear)
+    {
+        printf("no requests in the queue \n");
+        return ;
+    }
+    else
+    {
+        printf("request in progress is :\t");
+        array(inp_arr[Front]);
+        lv=lv+1;
+        logval(inp_arr[Front]);
+        value=inp_arr[Front];
+        Front = Front + 1;
+    }
+} 
+
+void pop()  // function for priority dispatch , to release the recently entered delivery request
+{
+    if (top == -1)
+    {
+        printf("no request in the queue");
+    }
+    else
+    {
+        printf("request in progress is \t");
+        array(inp_arr[top]);
+        logval(inp_arr[top]);
+        lv=lv+1;
+        top = top - 1;
+        Rear=Rear-1;
+        
+    }
+}
+
+struct node   // forming a singly linked list for overloaded drones
+{
+    char data[20];                
+    struct node *next;   
+} ;      
+
+struct node *head,*newnode,*temp;
+
+void createNodeList() // adding elements in the overloaded drone list
+{
+    newnode=(struct node *)malloc(sizeof(struct node));
+    printf("enter the drone name to enter:\n");
+    scanf("%s",&newnode->data);
+    newnode->next=0;
+    if(head==NULL)
+    {
+        head=newnode;
+        temp=newnode;
+    }
+    else
+    {
+        temp->next=newnode;
+        temp=newnode;
+    }
+    
+}
+
+struct dnode  // creating a doubly linked list for serviced drones ready for usage
+{    
+    char data[20];
+    struct dnode *next;
+    struct dnode *prev;
+};
+
+struct dnode *dhead,*dnewnode,*dtemp,*duse,*trav;
+
+
+void insert()   //to add names to the doubly linked list
+{
+    dnewnode=(struct dnode*)malloc(sizeof(struct dnode));
+    printf("enter the name of the drone to include\n");
+    scanf("%s",&dnewnode->data);
+    dnewnode->next = 0;
+    if (dhead == NULL)
+    {
+        dhead = dnewnode;
+        dtemp=dnewnode;
+        dnewnode->prev = 0;
+        duse=dhead;
+    }
+    else
+    {
+        dtemp->next=dnewnode;
+        dnewnode->prev=dtemp;
+        dnewnode->next=0;
+        dtemp=dnewnode;
+    }
+}
+
+struct cnode   // creating a circular singly linked list for emergency rerouting
+{
+    char data[20];
+    struct cnode * next;
+};
+
+struct cnode *chead,*cnewnode,*ctemp;
+
+
+void addnode()  // to add the drones in the emergency rerouting
+{
+    cnewnode=(struct cnode *)malloc(sizeof(struct cnode));
+    printf("enter the name of emergency drone to be rerouted:\n");
+    scanf("%s",&cnewnode->data);
+    if(chead==NULL)
+    {
+        chead=cnewnode;
+        ctemp=cnewnode;
+        cnewnode->next=chead;
+    }
+    else
+    {
+        cnewnode->next=chead;
+        ctemp->next=cnewnode;
+        ctemp=cnewnode;
+        
+    }
+}
+
+void deletenode()  // to release drones whe the wheteher is clear
+{
+    printf("the emergency drone that is rerouted is : %s",chead->data);
+    chead=chead->next;
+    ctemp->next=chead;
+}
+
+int main()  // main function starts
+{
+    int opt,option,choice,any;
+    while(opt!=5)
+    {
+        printf("enter the service to be provided\n");
+        printf("1.add delivery request\n2.dispatch\n3.flight log unit\n4.maintanence tracker\n5.exit\n");
+        scanf("%d",&opt);
+        switch(opt)
+        {
+            case 1:   // case for delivery request
+            
+            printf("enter the delivery request required");
+            printf("1. food\n2.medicine\n3.tools\n4.water\n5.parts\n6.fuel\n");
+            enqueue();  // function call to input values
+            break;
+            
+            
+            case 2:   //case for dispatching
+            
+            printf("is it a priority dispatch or normal way dispatch??");
+            printf("if priority press 1 or press any other number:");
+            scanf("%d",&option);
+            if(option==1)  // if it a priority dispatch , dispatching the recently added delivery request
+            {
+                pop();
+                if(duse->next=0)  // assigning the drones for the delivery request
+                {
+                    printf("no drones available to dispatch,add drones in serviced drone list\n");
+                }
+                else
+                {
+                    printf("assigning the dispatch to drone named : %s\n",&duse->data);
+                    duse=duse->next;
+                }
+            }
+            
+            else   // if it is a normal dispatch, dequeue the needed dispatch
+            {
+                dequeue();
+                if(duse->next=0)  // assigning the drones for the dispatch
+                {
+                    printf("no drones available to dispatch,add drones in serviced drone list\n");
+                }
+                else
+                {
+                    printf("assigning the dispatch to drone named : %s\n",&duse->data);
+                    duse=duse->next;
+                }
+                
+            }
+            break;
+            
+            case 3:   // displying the flight log
+            
+            printf("Displying the last %d dispatches done\n ",lv);
+            for(int i=0;i<lv;i++)
+            {
+                array(flight_log[i]);
+            }
+            break;
+            
+            
+            case 4:  // to track the overloaded drones , drones in usage , drones for rerouting and knowing the latest dispatches and the assigned drones 
+            
+            
+            printf("maintanence tracker\n");
+            printf("enter a choice\n1.overloaded drones\n2.seviced drones\n3.emergency drones\n4.get list of recently dispatched drones");
+            int select;
+            scanf("%d",&choice);
+            
+            switch(choice)
+            {
+                case 1: // singly list for the drones in overload condition
+                
+                printf("do u want to 1.display names or 2. input names\n");
+                scanf("%d",&select);
+                if(select==1)
+                {
+                    temp=head;
+                    while(temp!=0)
+                    {
+                       printf("%s\n",temp->data);
+                       temp=temp->next;
+                    }
+                }
+                else if(select==2)
+                {
+                    createNodeList();
+                }
+                
+                else
+                {
+                    printf("not a valid option");
+                }
+                
+                break;
+                
+                case 2: // doubly list for drones in usage
+                
+                printf("do u want to 1.display names or 2. input names\n");
+                scanf("%d",&select);
+                if(select==1)
+                {
+                    dtemp=dhead;
+                    while(temp!=0)
+                    {
+                       printf("%s\n",dtemp->data);
+                       dtemp=dtemp->next;
+                    }
+                }
+                else if(select==2)
+                {
+                    insert();
+                }
+                
+                else
+                {
+                    printf("not a valid option");
+                }
+
+                break;
+                
+                case 3:  // circular list for emergency reroutig drones
+                
+                printf("select one option\n1.add drone\n2.release drone\n3.display drones");
+                scanf("%d",&any);
+                switch(any)
+                {
+                    case 1:
+                    addnode();
+                    break;
+                    
+                    case 2:
+                    deletenode();
+                    break;
+                    
+                    case 3:
+                    ctemp=chead;
+                    do
+                    {
+                        printf("%s\n",&ctemp->data);
+                        ctemp=ctemp->next;
+                    }
+                    while(ctemp!=chead);
+                    
+                    break;
+                    
+                    default:
+                    printf("enter a valid option!!! exiting options!!\n");
+                    break;
+                }
+                break;
+                
+                case 4:  // displying the recent dispatches
+                
+                if(duse->prev==dhead)
+                {
+                    printf("no recent dispatches done \n");
+                }
+                else
+                {
+                    printf("recently dispatched drones and delivery\n");
+                    int a =0;
+                    trav=duse->prev;
+                    while(trav->prev!=dhead)
+                    {
+                        printf("%s %s",trav->data,flight_log[a]);
+                        trav=trav->prev;
+                        a=a+1;
+                    }
+                    
+                }
+                
+                
+                default :
+                printf("not an valid option !!!exiting!!!\n");
+            }
+            break;
+            
+            case 5 :
+            printf("program exiting\n");
+            break;
+            
+            default:
+            printf("not a valid choice!!!\n");
+            break;
+            
+        }
+    }
+}
